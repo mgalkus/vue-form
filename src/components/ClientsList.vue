@@ -30,9 +30,6 @@ export default {
       required: true
     }
   },
-  data: () => ({
-    newClient: {}
-  }),
   methods: {
     getClientFullName(client) {
       return client.firstName + ' ' + client.lastName

@@ -8,6 +8,7 @@
         @editClient="onInitiateClientEdit"
       />
       <CreateEditDialog
+        v-if="dialog"
         v-model="dialog"
         :mode="dialogMode"
         :client="client"

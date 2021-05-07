@@ -138,14 +138,10 @@ export default {
     freshClientData: null,
     initialClientData: null
   }),
-  watch: {
-    value(dialogOpen) {
-      if (dialogOpen) {
-        this.freshClientData = this.client
-        // disconnecting from reference to client object:
-        this.initialClientData = { ...this.client }
-      }
-    }
+  created() {
+    this.freshClientData = this.client
+    // disconnecting from reference so initialClientData does not get changes in client:
+    this.initialClientData = { ...this.client }
   },
   computed: {
     dialog: {
