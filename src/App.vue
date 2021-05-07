@@ -1,60 +1,83 @@
 <template>
   <v-app>
-    <v-app-bar
-      app
-      color="primary"
-      dark
-    >
-      <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
-
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
-      </div>
-
-      <v-spacer></v-spacer>
-
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
-      >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
-    </v-app-bar>
-
-    <v-main>
-      <HelloWorld/>
-    </v-main>
+    <v-container>
+      <ClientsList
+        :clients="clients"
+        @addClient="onClickAddClient"
+        @removeClient="onRemoveClient"
+        @editClient="onInitiateClientEdit"
+      />
+      <CreateEditDialog
+        v-model="dialog"
+        :mode="dialogMode"
+        :client="client"
+        @saveNewClient="onSaveNewClient"
+        @saveExistingClient="onSaveExistingClient"
+        @revertExistingClient="onRevertExistingClient"
+        @closeDialog="onCloseDialog"
+      />
+    </v-container>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld';
+import { emptyClientData, initialClients } from "./constants/clients";
+import ClientsList from "./components/ClientsList";
+import CreateEditDialog from "./components/CreateEditDialog";
 
 export default {
-  name: 'App',
-
-  components: {
-    HelloWorld,
-  },
-
+  name: "App",
+  components: { ClientsList, CreateEditDialog },
   data: () => ({
-    //
+    dialog: false,
+    dialogMode: "",
+    clients: [],
+    client: { ...emptyClientData },
+    editingClientIndex: null
   }),
+  mounted() {
+    // if client list is found in localStorage, display it (it may also be empty if user deleted all clients):
+    if (localStorage.getItem("clients")) {
+      this.clients = JSON.parse(localStorage.getItem("clients"));
+    } else {
+      // if no client list found in localStorage, save and display some initial client data:
+      this.clients = initialClients;
+      this.saveCLientsToStorage();
+    }
+  },
+  methods: {
+    onClickAddClient() {
+      this.dialogMode = "create";
+      this.dialog = true;
+    },
+    onSaveNewClient(client) {
+      this.clients.push(client);
+      this.saveCLientsToStorage();
+    },
+    onSaveExistingClient(client) {
+      this.clients.splice(this.editingClientIndex, 1, client);
+      this.saveCLientsToStorage();
+    },
+    onRevertExistingClient(initialClientData) {
+      this.clients.splice(this.editingClientIndex, 1, initialClientData);
+    },
+    onRemoveClient(index) {
+      this.clients.splice(index, 1);
+      this.saveCLientsToStorage();
+    },
+    onInitiateClientEdit(index) {
+      this.client = this.clients[index];
+      this.editingClientIndex = index;
+      this.dialogMode = "edit";
+      this.dialog = true;
+    },
+    saveCLientsToStorage() {
+      const parsed = JSON.stringify(this.clients);
+      localStorage.setItem("clients", parsed);
+    },
+    onCloseDialog() {
+      this.client = emptyClientData;
+    }
+  }
 };
 </script>
