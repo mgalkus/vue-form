@@ -17,14 +17,14 @@
         :client="client"
         @saveNewClient="onSaveNewClient"
         @saveExistingClient="onSaveExistingClient"
-        @close="onCloseDialog"
+        @close="cleanData"
       />
     </v-container>
   </v-app>
 </template>
 
 <script>
-import { emptyClientData, initialClients } from "./constants/clients";
+import { emptyClientData } from "./constants/clients";
 import ClientsList from "./components/ClientsList";
 import CreateEditDialog from "./components/CreateEditDialog";
 
@@ -34,37 +34,33 @@ export default {
   data: () => ({
     dialog: false,
     dialogMode: "",
-    clients: [],
     client: null,
     editingClientIndex: null
   }),
-  mounted() {
-    if (localStorage.getItem("clients")) {
-      // if client list is found in localStorage, display it (it may also be empty if user deleted all clients):
-      this.clients = JSON.parse(localStorage.getItem("clients"));
-    } else {
-      // if no client list found in localStorage, save and display some initial client data:
-      this.clients = initialClients;
-      this.saveClientsToStorage();
+  computed: {
+    clients() {
+      return this.$store.getters.getClients
     }
+  },
+  mounted() {
+    this.$store.dispatch('loadClients')
   },
   methods: {
     onClickAddClient() {
-      this.client = JSON.parse(JSON.stringify(emptyClientData));
+      this.client = JSON.parse(JSON.stringify(emptyClientData))
       this.dialogMode = "create";
       this.dialog = true;
     },
     onSaveNewClient(client) {
-      this.clients.push(client);
-      this.saveClientsToStorage();
+      this.$store.dispatch('saveNewClient', client)
     },
     onSaveExistingClient(client) {
-      this.clients.splice(this.editingClientIndex, 1, client);
-      this.saveClientsToStorage();
+      const index = this.editingClientIndex
+      this.$store.dispatch('editClient', { client, index})
+      this.cleanData()
     },
     onRemoveClient(index) {
-      this.clients.splice(index, 1);
-      this.saveClientsToStorage();
+      this.$store.dispatch('removeClient', index)
     },
     onClickClientEdit(index) {
       this.client = this.clients[index];
@@ -80,13 +76,7 @@ export default {
     cleanData() {
       this.dialogMode = ''
       this.editingClientIndex = null
-    },
-    onCloseDialog(initialClientData) {
-      if (this.dialogMode === 'edit') {
-        this.clients.splice(this.editingClientIndex, 1, initialClientData)
-        this.client = { ...emptyClientData };
-      } else { this.client = initialClientData }
-      this.cleanData();
+      this.client = emptyClientData
     }
   }
 };

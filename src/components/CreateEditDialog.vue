@@ -17,7 +17,7 @@
           <v-row>
             <v-col class="mt-n4" cols="12" md="6">
               <v-text-field
-                :value="clientData.firstName"
+                :value="localClient.firstName"
                 :rules="[rules.noEmpty]"
                 @input="onInputData('firstName', $event)"
                 label="First name"
@@ -28,7 +28,7 @@
             </v-col>
             <v-col class="mt-n4" cols="12" md="6">
               <v-text-field
-                :value="clientData.lastName"
+                :value="localClient.lastName"
                 :rules="[rules.noEmpty]"
                 @input="onInputData('lastName', $event)"
                 label="Last name"
@@ -39,7 +39,7 @@
             </v-col>
             <v-col class="mt-n4" cols="12" md="6">
               <v-text-field
-                :value="clientData.phone"
+                :value="localClient.phone"
                 :rules="[rules.noEmpty, rules.isPhone]"
                 @input="onInputData('phone', $event)"
                 label="Phone number"
@@ -60,7 +60,7 @@
             <v-col class="mt-n4" cols="12" md="6">
               <v-autocomplete
                 :items="countries"
-                :value="clientData.address.country"
+                :value="localClient.address.country"
                 @input="onInputAddress('country', $event)"
                 :rules="[rules.noEmpty]"
                 dense
@@ -73,7 +73,7 @@
             </v-col>
             <v-col class="mt-n4" cols="12" md="6">
               <v-text-field
-                :value="clientData.address.locality"
+                :value="localClient.address.locality"
                 :rules="[rules.noEmpty]"
                 @input="onInputAddress('locality', $event)"
                 label="City"
@@ -84,7 +84,7 @@
             </v-col>
             <v-col class="mt-n4" cols="12" md="6">
               <v-text-field
-                :value="clientData.address.route"
+                :value="localClient.address.route"
                 :rules="[rules.noEmpty]"
                 @input="onInputAddress('route', $event)"
                 label="Street name"
@@ -95,7 +95,7 @@
             </v-col>
             <v-col class="mt-n4" cols="12" md="6">
               <v-text-field
-                :value="clientData.address.street_number"
+                :value="localClient.address.street_number"
                 :rules="[rules.noEmpty]"
                 @input="onInputAddress('street_number', $event)"
                 label="House number"
@@ -106,7 +106,7 @@
             </v-col>
             <v-col class="mt-n4" cols="12" md="6">
               <v-text-field
-                :value="clientData.address.postal_code"
+                :value="localClient.address.postal_code"
                 :rules="[rules.noEmpty]"
                 @input="onInputAddress('postal_code', $event)"
                 label="Post code"
@@ -153,13 +153,13 @@ export default {
     }
   },
   data: () => ({
-    clientData: null,
+    localClient: null,
     initialClientData: null,
     fetchError: false
   }),
   created() {
     // so we do not mutate prop:
-    this.clientData = this.client;
+    this.localClient = this.client;
     // disconnecting from reference so initialClientData does not get changes in client:
     this.initialClientData = JSON.parse(JSON.stringify(this.client));
   },
@@ -201,27 +201,27 @@ export default {
       this.fetchError = true;
     },
     onInputData(path, value) {
-      this.clientData[path] = value;
+      this.localClient[path] = value;
     },
     onInputAddress(path, value) {
-      this.clientData.address[path] = value;
-    },
-    cleanData() {
-      this.clientData = null;
-      this.initialClientData = null;
-      this.fetchError = false;
+      this.localClient.address[path] = value;
     },
     onSave() {
       if (this.$refs.form.validate()) {
-        this.isCreateMode ? this.$emit("saveNewClient", this.clientData) : this.$emit("saveExistingClient", this.clientData);
-        this.dialog = false;
-        this.$emit("close");
+        const eventName = this.isCreateMode ? "saveNewClient" : "saveExistingClient";
+        this.$emit(eventName, this.localClient);
+        this.cleanData()
       }
     },
     onClickCloseDialog() {
-      this.$emit("close", this.initialClientData);
-      this.dialog = false;
+      this.$emit("close");
+      this.isEditMode ? this.$emit('saveExistingClient', this.initialClientData) : null;
       this.cleanData();
+    },
+    cleanData() {
+      this.dialog = false;
+      this.localClient = this.initialClientData;
+      this.fetchError = false;
     }
   }
 };
