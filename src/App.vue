@@ -68,15 +68,10 @@ export default {
       this.dialogMode = "edit";
       this.dialog = true;
     },
-    saveClientsToStorage() {
-      const parsed = JSON.stringify(this.clients);
-      localStorage.setItem("clients", parsed);
-      this.cleanData()
-    },
     cleanData() {
       this.dialogMode = ''
       this.editingClientIndex = null
-      this.client = emptyClientData
+      this.client = null
     }
   }
 };

@@ -43,6 +43,6 @@ export default new Vuex.Store({
     }
   },
   getters: {
-    getClients: state => state.clients
+    getClients: state => JSON.parse(JSON.stringify(state.clients))
   }
 });

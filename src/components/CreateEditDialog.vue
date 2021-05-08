@@ -158,9 +158,7 @@ export default {
     fetchError: false
   }),
   created() {
-    // so we do not mutate prop:
-    this.localClient = this.client;
-    // disconnecting from reference so initialClientData does not get changes in client:
+    this.localClient = JSON.parse(JSON.stringify(this.client));
     this.initialClientData = JSON.parse(JSON.stringify(this.client));
   },
   computed: {
@@ -215,12 +213,10 @@ export default {
     },
     onClickCloseDialog() {
       this.$emit("close");
-      this.isEditMode ? this.$emit('saveExistingClient', this.initialClientData) : null;
       this.cleanData();
     },
     cleanData() {
       this.dialog = false;
-      this.localClient = this.initialClientData;
       this.fetchError = false;
     }
   }
