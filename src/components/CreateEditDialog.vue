@@ -58,16 +58,18 @@
               ></vue-google-autocomplete>
             </v-col>
             <v-col class="mt-n4" cols="12" md="6">
-              <v-text-field
+              <v-autocomplete
+                :items="countries"
                 :value="clientData.address.country"
-                :rules="[rules.noEmpty]"
                 @input="onInputAddress('country', $event)"
+                :rules="[rules.noEmpty]"
+                dense
                 label="Country"
                 outlined
-                dense
                 id="country"
                 ref="country"
-              />
+              >
+              </v-autocomplete>
             </v-col>
             <v-col class="mt-n4" cols="12" md="6">
               <v-text-field
@@ -129,6 +131,7 @@
 <script>
 import VueGoogleAutocomplete from "vuetify-vue-google-autocomplete";
 import ValidationRules from "../mixins/ValidationRules";
+import { countries } from "../constants/countries";
 
 export default {
   name: "CreateEditDialog",
@@ -161,6 +164,9 @@ export default {
     this.initialClientData = JSON.parse(JSON.stringify(this.client));
   },
   computed: {
+    countries() {
+      return countries
+    },
     dialog: {
       get() {
         return this.value;
@@ -182,15 +188,13 @@ export default {
   methods: {
     getFetchedAddress(data) {
       const localThis = this;
-      const dataArray = [];
       Object.entries(data).map((e) => {
         const param = e[0];
         const value = e[1];
         if (param === 'country' || param === 'locality' || param === 'route' || param === 'street_number' || param === 'postal_code') {
-          dataArray.push({ param, value });
+          localThis.onInputAddress(param, value)
         }
       })
-      dataArray.map(e => localThis.onInputAddress(e.param, e.value));
     },
     onFetchError(err) {
       console.log(err);
