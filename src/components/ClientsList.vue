@@ -15,7 +15,7 @@
             <v-icon @click="editClient(index)">mdi-pencil</v-icon>
           </div>
         </v-list-item>
-        <v-divider :key="`divider-${index}`"></v-divider>
+        <v-divider v-if="index !== clients.length - 1" :key="`divider-${index}`"></v-divider>
       </template>
     </v-list>
   </v-form>
@@ -35,7 +35,7 @@ export default {
       return client.firstName + ' ' + client.lastName
     },
     getClientFullAddress(client) {
-      return client.address.street + ' ' + client.address.houseNr + ', ' + client.address.city + ', ' + client.address.postCode + ', ' + client.address.country
+      return client.address.route + ' ' + client.address.street_number + ', ' + client.address.locality + ', ' + client.address.postal_code + ', ' + client.address.country
     },
     removeClient(index) {
       this.$emit("removeClient", index);
